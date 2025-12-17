@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: ashrith2727/gitops:15
+        image: ashrith2727/gitops:v1
         ports:
         - containerPort: 3000
         readinessProbe:
