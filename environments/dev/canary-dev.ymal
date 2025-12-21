@@ -1,22 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitops-demo-stable
+  name: gitops-demo-canary
   namespace: dev
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gitops-demo
+      track: canary
   template:
     metadata:
       labels:
         app: gitops-demo
+        track: canary
     spec:
       serviceAccountName: gitops-app-sa
       containers:
       - name: app
-        image: ashrith2727/gitops:v1
+        image: ashrith2727/gitops:v2   # NEW VERSION
         ports:
         - containerPort: 3000
         readinessProbe:
