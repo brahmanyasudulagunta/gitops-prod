@@ -18,7 +18,7 @@ spec:
       serviceAccountName: gitops-app-sa
       containers:
       - name: app
-        image: ashrith2727/gitops:v2   # NEW VERSION
+        image: ashrith2727/gitops:IMAGE_TAG   # NEW VERSION
         ports:
         - containerPort: 3000
         readinessProbe:
