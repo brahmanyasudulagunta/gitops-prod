@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: develop-svc
+  namespace: develop
+spec:
+  type: ClusterIP
+  selector:
+    app: gitops-demo
+  ports:
+  - port: 80
+    targetPort: 3000

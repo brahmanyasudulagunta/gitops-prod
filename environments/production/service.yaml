@@ -1,8 +1,8 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: gitops-demo-service
-  namespace: dev
+  name: production-svc
+  namespace: production
 spec:
   type: ClusterIP
   selector:

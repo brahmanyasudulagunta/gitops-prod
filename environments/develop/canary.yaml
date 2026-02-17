@@ -1,17 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitops-demo-stable
-  namespace: dev
+  name: develop-canary
+  namespace: develop
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gitops-demo
+      track: canary
   template:
     metadata:
       labels:
         app: gitops-demo
+        track: canary
     spec:
       serviceAccountName: gitops-app-sa
       containers:
@@ -34,9 +36,3 @@ spec:
           httpGet:
             path: /health
             port: 3000
-        env:
-        - name: APP_ENV
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: APP_ENV
