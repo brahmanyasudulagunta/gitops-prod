@@ -7,15 +7,15 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: gitops-demo
+      app: gitops
       track: canary
   template:
     metadata:
       labels:
-        app: gitops-demo
+        app: gitops
         track: canary
     spec:
-      serviceAccountName: gitops-app-sa
+      serviceAccountName: gitops-sa
       containers:
       - name: app
         image: ashrith2727/gitops:v1

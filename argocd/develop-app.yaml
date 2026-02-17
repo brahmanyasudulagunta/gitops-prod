@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitops-develop
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/brahmanyasudulagunta/gitops-prod
+    targetRevision: HEAD
+    path: environments/develop
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: develop
+  syncPolicy:
+    automated:
+      selfHeal: true
