@@ -33,17 +33,24 @@ ArgoCD watches this repo → syncs manifests to the Kubernetes cluster
 
 ```
 gitops-prod/
+├── argocd/
+│   ├── develop-app.yaml       # ArgoCD Application (auto-sync + self-heal)
+│   ├── staging-app.yaml       # ArgoCD Application (auto-sync + self-heal)
+│   └── production-app.yaml    # ArgoCD Application (manual sync only)
 ├── environments/
 │   ├── develop/
 │   │   ├── deployment.yaml    # Stable deployment (2 replicas)
 │   │   ├── canary.yaml        # Canary deployment (1 replica, gets new versions first)
-│   │   └── service.yaml       # ClusterIP service (port 80 → 3000)
+│   │   ├── service.yaml       # ClusterIP service (port 80 → 3000)
+│   │   └── serviceaccount.yaml  # Pod identity for gitops-app-sa
 │   ├── staging/
 │   │   ├── deployment.yaml    # Stable deployment (2 replicas)
-│   │   └── service.yaml       # ClusterIP service (port 80 → 3000)
+│   │   ├── service.yaml       # ClusterIP service (port 80 → 3000)
+│   │   └── serviceaccount.yaml  # Pod identity for gitops-app-sa
 │   └── production/
 │       ├── deployment.yaml    # Stable deployment (3 replicas, higher resources)
-│       └── service.yaml       # ClusterIP service (port 80 → 3000)
+│       ├── service.yaml       # ClusterIP service (port 80 → 3000)
+│       └── serviceaccount.yaml  # Pod identity for gitops-app-sa
 └── README.md
 ```
 
