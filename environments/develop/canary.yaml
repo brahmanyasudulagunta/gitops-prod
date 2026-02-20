@@ -20,7 +20,7 @@ spec:
       - name: app
         image: ashrith2727/gitops:39
         ports:
-        - containerPort: 3000
+        - containerPort: 3002
         resources:
           requests:
             cpu: "100m"
@@ -31,8 +31,8 @@ spec:
         readinessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 3002
         livenessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 3002
