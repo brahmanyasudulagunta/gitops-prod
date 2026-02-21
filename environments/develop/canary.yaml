@@ -18,7 +18,7 @@ spec:
       serviceAccountName: gitops-sa
       containers:
       - name: app
-        image: ashrith2727/gitops:39
+        image: ashrith2727/gitops:40
         ports:
         - containerPort: 3002
         resources:
