@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gitops-demo-stable
+  name: production-stable
   namespace: production
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: gitops-demo
+      app: gitops
   template:
     metadata:
       labels:
-        app: gitops-demo
+        app: gitops
     spec:
-      serviceAccountName: gitops-app-sa
+      serviceAccountName: gitops-sa
       containers:
       - name: app
         image: ashrith2727/gitops:40
