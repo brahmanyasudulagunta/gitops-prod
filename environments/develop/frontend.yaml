@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: develop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: ashrith2727/frontend-gitops:v1
+        env:
+        - name: VITE_API_URL
+          value: http://backend.develop.svc.cluster.local:8001
+        ports:
+        - containerPort: 4000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: develop
+spec:
+  type: ClusterIP
+  selector:
+    app: frontend
+  ports:
+  - port: 4000
+    targetPort: 4000
