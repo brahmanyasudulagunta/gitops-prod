@@ -18,9 +18,9 @@ spec:
         image: ashrith2727/frontend-gitops:v1
         env:
         - name: VITE_API_URL
-          value: http://backend.production.svc.cluster.local:8001
+          value: http://backend.production.svc.cluster.local:8002
         ports:
-        - containerPort: 4000
+        - containerPort: 4001
         resources:
           requests:
             cpu: 100m
@@ -39,5 +39,5 @@ spec:
   selector:
     app: frontend
   ports:
-  - port: 4000
-    targetPort: 4000
+  - port: 4001
+    targetPort: 4001

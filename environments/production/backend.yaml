@@ -20,13 +20,13 @@ spec:
         - name: DATABASE_URL
           value: postgresql://krishna:1729@postgres:5432/postgresdb
         - name: SECRET_KEY
-          value: "your-super-secret-jwt-key-change-this"
+          value: "gitops-secret-2026"
         - name: ALGORITHM
           value: HS256
         - name: ACCESS_TOKEN_EXPIRE_MINUTES
-          value: "30"
+          value: "1440"
         ports:
-        - containerPort: 8001
+        - containerPort: 8002
         resources:
           requests:
             cpu: 100m
@@ -44,5 +44,5 @@ spec:
   selector:
     app: backend
   ports:
-  - port: 8001
-    targetPort: 8001
+  - port: 8002
+    targetPort: 8002
