@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: backend-gitops
   namespace: develop
 spec:
   replicas: 1
@@ -14,7 +14,7 @@ spec:
         app: backend
     spec:
       containers:
-      - name: backend
+      - name: backend-gitops
         image: ashrith2727/backend-gitops:v1
         env:
         - name: DATABASE_URL
@@ -38,7 +38,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: backend-gitops
   namespace: develop
 spec:
   selector:

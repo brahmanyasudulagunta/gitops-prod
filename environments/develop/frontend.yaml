@@ -18,7 +18,7 @@ spec:
         image: ashrith2727/frontend-gitops:v1
         env:
         - name: VITE_API_URL
-          value: http://backend.develop.svc.cluster.local:8001
+          value: http://backend-gitops.develop.svc.cluster.local:8001
         ports:
         - containerPort: 4000
         resources:
