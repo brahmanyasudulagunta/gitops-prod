@@ -1,26 +1,38 @@
-# gitops-prod
+# Gitops-Manifests
 
-Kubernetes deployment manifests for the **gitops** application across all environments. This repo is the **single source of truth** for what runs in the cluster — ArgoCD watches it and syncs automatically.
+The continuous delivery (CD) tier of the platform. This repository contains the declarative Kubernetes manifests and ArgoCD configurations for deploying applications across all environments. It acts as the **single source of truth** for what runs in the cluster.
 
 [![ArgoCD](https://img.shields.io/badge/CD-ArgoCD-EF7B4D?style=for-the-badge&logo=argo&logoColor=white)](https://argoproj.github.io/cd)
 [![Kubernetes](https://img.shields.io/badge/Runtime-Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
 ---
 
-## Architecture (3-Repo GitOps)
+## 3-Repo GitOps Architecture Role
 
-| Repository | Role | Tools |
-|------------|------|-------|
-| [DevPlatform](https://github.com/brahmanyasudulagunta/DevPlatform) | Infrastructure provisioning & security | Terraform, Ansible, RBAC |
-| [gitops](https://github.com/brahmanyasudulagunta/gitops) | Platform Control Plane (UI + API) | FastAPI, React, PostgreSQL |
-| **gitops-prod** (this) | Deployment manifests (GitOps) | Kubernetes manifests, ArgoCD |
+This repository coordinates the GitOps delivery pattern:
+
+| Repository | Purpose | Primary Operator / Owner |
+| :--- | :--- | :--- |
+| **`Platform-Infrastructure`** | Provisions secure environments, resource limits, and network policies. | Platform / DevOps Team |
+| **`Application-Code`** | Contains the FastAPI, React, and PostgreSQL application source code. | Software Development Team |
+| **`Gitops-Manifests`** (this) | Stores environment-specific K8s manifests, watched by ArgoCD. | GitOps Deployment Engine |
 
 ```
-DevPlatform provisions namespaces (develop / production)
-    ↓
-Jenkins CI builds image → auto-updates develop/develop.yaml here
-    ↓
-ArgoCD watches this repo → syncs manifests to the Kubernetes cluster
+Platform-Infrastructure provisions namespaces  →  Gitops-Manifests deploys apps into them via ArgoCD
+```
+
+---
+
+## Core Workflows & Lifecycles
+
+```
+1. Developer pushes code to Application-Code repository.
+                       ↓
+2. Jenkins CI builds a Docker image and pushes to DockerHub: ashrith2727/backend-gitops:<TAG>
+                       ↓
+3. Jenkins auto-updates Gitops-Manifests (e.g. environments/develop/backend.yaml) with the new tag.
+                       ↓
+4. ArgoCD detects the change in this repository and synchronizes state into the Kubernetes cluster.
 ```
 
 ---
@@ -28,67 +40,38 @@ ArgoCD watches this repo → syncs manifests to the Kubernetes cluster
 ## Repository Structure
 
 ```
-gitops-prod/
+Gitops-Manifests/
 ├── environments/
 │   ├── develop/
-│   │   ├── develop.yaml        # Deployment (2 replicas)
-│   │   ├── service.yaml        # ClusterIP service (port 80 → 3002)
-│   │   └── serviceaccount.yaml # Pod identity (gitops-sa)
+│   │   ├── backend.yaml        # FastAPI backend pod and service configuration
+│   │   ├── frontend.yaml       # React frontend pod and service configuration
+│   │   ├── postgres.yaml       # Database pod, persistent volumes, and configuration
+│   │   └── serviceaccount.yaml # Pod-level access identities (gitops-sa)
 │   └── production/
-│       ├── deployment.yaml     # Deployment (3 replicas, higher resources)
-│       ├── service.yaml        # ClusterIP service (port 80 → 3002)
-│       └── serviceaccount.yaml # Pod identity (gitops-sa)
+│       ├── backend.yaml        # FastAPI backend specs (higher replicas/limits)
+│       ├── frontend.yaml       # React frontend specs (higher replicas/limits)
+│       ├── postgres.yaml       # Production database specs
+│       └── serviceaccount.yaml # Production pod identities
+├── argocd/
+│   ├── develop-app.yaml        # ArgoCD App pointing to environments/develop
+│   └── production-app.yaml     # ArgoCD App pointing to environments/production
 └── README.md
 ```
 
 ---
 
-## Environments
+## Target Environment Specifications
 
-| Environment | Namespace | Replicas | CPU Request/Limit | Memory Request/Limit |
-|-------------|-----------|----------|--------------------|----------------------|
-| Develop | `develop` | 2 | 100m / 300m | 128Mi / 256Mi |
-| Production | `production` | 3 | 200m / 500m | 256Mi / 512Mi |
-
----
-
-## Deployment Lifecycle
-
-```
-1. Developer pushes code to "gitops" repo
-        ↓
-2. Jenkins CI builds image → pushes to DockerHub (ashrith2727/gitops:<BUILD_NUMBER>)
-        ↓
-3. Jenkins auto-updates develop/develop.yaml with new image tag
-        ↓
-4. ArgoCD syncs deployment to "develop" namespace
-        ↓
-5. Validate in develop (check health, logs, metrics)
-        ↓
-6. Manually update production/deployment.yaml → promote to production (3 replicas)
-```
+| Environment | Target Namespace | Service Replicas | CPU Allocation (Req/Lim) | Memory Allocation (Req/Lim) | Sync Policy |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **develop** | `develop` | 1 per service | 100m / 300m | 128Mi / 256Mi | Automated (Self-Heal) |
+| **production** | `production` | 3 per service | 200m / 500m | 256Mi / 512Mi | Automated |
 
 ---
 
-## ArgoCD Applications
+## Kubernetes Delivery Configurations
 
-| Application Name | Source Path | Target Namespace | Sync Policy |
-|-----------------|------------|------------------|-------------|
-| `gitops-develop` | `environments/develop` | `develop` | Automated (auto-sync + self-heal) |
-| `gitops-production` | `environments/production` | `production` | Automated |
-
----
-
-## Kubernetes Features
-
-- **Readiness & Liveness probes** on `/health` endpoint (port 3002)
-- **Resource requests and limits** on all containers
-- **Service accounts** (`gitops-sa`) for pod identity
-- **Rolling updates** (default Kubernetes strategy)
-- **Production probe delays** — `initialDelaySeconds` and `periodSeconds` for safer rollouts
-
----
-
-## Prerequisites
-
-The namespaces (`develop`, `production`) must be provisioned by the [DevPlatform](https://github.com/brahmanyasudulagunta/DevPlatform) repo before deploying. DevPlatform sets up RBAC, network policies, and resource quotas for each namespace.
+* **Automated Sync & Drift Correction:** Watched by ArgoCD controllers. Any manual configurations inside the live cluster are immediately overridden to preserve this repository's configurations.
+* **Resiliency Probes:** Health monitoring is configured for all backend pods using standard Kubernetes Readiness and Liveness probes on `/health` (port `8001`).
+* **Safe Rolling Upgrades:** Incorporates standard rolling updates with readiness delays configured to guarantee zero-downtime upgrades.
+* **Namespace Isolation:** All deployments operate within namespaces dynamically configured by the `Platform-Infrastructure` repository.
